@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✈ Pilot Study Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;--bg:#f7f9fc;--bg2:#eef2f7;
+  --blue-deep:#0a3d6b;--blue:#1565c0;--blue-mid:#1e88e5;--blue-light:#42a5f5;
+  --blue-pale:#e3f2fd;--blue-pale2:#bbdefb;--accent:#0288d1;
+  --text:#1a2332;--text2:#4a6080;--text3:#8fa8c0;
+  --border:#dde6f0;--border2:#c5d8ec;
+  --green:#2e7d32;--green-bg:#e8f5e9;
+  --p1:#2e7d32;--p2:#1565c0;--p3:#e65100;--p4:#6a1b9a;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 2px 8px rgba(10,61,107,.10),0 1px 3px rgba(10,61,107,.06);
+  --shadow-sm:0 1px 3px rgba(10,61,107,.08);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:18px;line-height:1.65;min-height:100vh;}
+
+/* HERO */
+.hero{position:relative;height:260px;overflow:hidden;border-radius:0 0 28px 28px;}
+.hero img{width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block;}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,61,107,.18) 0%,rgba(10,61,107,.62) 100%);}
+.hero-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:2rem 2.5rem;}
+.hero-title{font-family:'DM Serif Display',serif;font-size:36px;font-weight:400;color:#fff;line-height:1.2;margin-bottom:5px;}
+.hero-sub{font-size:14px;color:rgba(255,255,255,.78);letter-spacing:.3px;}
+
+/* WRAP */
+.wrap{max-width:900px;margin:0 auto;padding:2rem 1.5rem 5rem;}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1.25rem 1.5rem;margin-bottom:1.5rem;}
+.card-title{font-size:13px;font-weight:600;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:10px;}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border2);}
+
+/* EXAM DATE */
+.exam-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.exam-lbl{font-size:15px;color:var(--text2);flex:1;min-width:120px;}
+.config-input{font-size:15px;padding:8px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius-sm);outline:none;transition:border-color .2s;}
+.config-input:focus{border-color:var(--blue-mid);}
+.set-btn{font-size:14px;font-weight:500;padding:8px 20px;border-radius:var(--radius-sm);background:var(--blue);color:#fff;border:none;cursor:pointer;transition:background .18s;white-space:nowrap;}
+.set-btn:hover{background:var(--blue-deep);}
+.save-chip{font-size:12px;color:var(--green);background:var(--green-bg);padding:4px 10px;border-radius:20px;display:none;}
+.save-chip.show{display:inline-block;}
+
+/* COUNTDOWN */
+.countdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:1.5rem;}
+.cd-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1.25rem 1rem 1rem;text-align:center;position:relative;overflow:hidden;}
+.cd-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue-mid),var(--blue-light));}
+.cd-num{font-size:44px;font-weight:600;line-height:1;color:var(--blue-deep);letter-spacing:-1px;}
+.cd-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px;font-weight:500;}
+
+/* PHASE CONFIG */
+.phase-config-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.pc-row{display:flex;flex-direction:column;gap:6px;}
+.pc-label{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--text);}
+.pc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.pc-dates{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.pc-dates span{font-size:13px;color:var(--text3);}
+.pc-input{font-size:14px;padding:6px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius-sm);outline:none;transition:border-color .2s;width:148px;}
+.pc-input:focus{border-color:var(--blue-mid);}
+
+/* GANTT */
+.gantt-wrap{overflow-x:auto;}
+.gantt-container{min-width:500px;}
+.gantt-header{display:flex;margin-bottom:6px;padding-left:110px;}
+.gantt-header-inner{flex:1;position:relative;height:20px;}
+.gantt-month-label{position:absolute;font-size:11px;color:var(--text3);font-weight:500;transform:translateX(-50%);white-space:nowrap;}
+.gantt-row{display:flex;align-items:center;margin-bottom:8px;}
+.gantt-label{width:110px;min-width:110px;font-size:13px;font-weight:600;color:var(--text2);padding-right:12px;line-height:1.3;}
+.gantt-track{flex:1;height:32px;background:var(--bg2);border-radius:6px;position:relative;overflow:hidden;}
+.gantt-bar{position:absolute;top:4px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;letter-spacing:.3px;transition:opacity .2s;white-space:nowrap;overflow:hidden;padding:0 8px;}
+.gantt-bar:hover{opacity:.85;}
+.gantt-today{position:absolute;top:0;bottom:0;width:2px;background:rgba(229,57,53,.7);z-index:2;}
+.gantt-today::after{content:'TODAY';position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:#e53935;letter-spacing:.5px;white-space:nowrap;}
+.gantt-exam-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(21,101,192,.8);z-index:2;}
+.gantt-exam-line::after{content:'EXAM';position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:var(--blue);letter-spacing:.5px;}
+.gantt-empty{font-size:14px;color:var(--text3);padding:0.5rem 0;font-style:italic;}
+
+/* PHASES SUMMARY */
+.phases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.phase-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1.1rem 1.25rem;transition:box-shadow .2s,border-color .2s;}
+.phase-card:hover{box-shadow:var(--shadow);border-color:var(--border2);}
+.ph-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:8px;}
+.ph-name{font-size:14px;font-weight:600;color:var(--text2);}
+.ph-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;white-space:nowrap;flex-shrink:0;}
+.badge-active{background:var(--green-bg);color:var(--green);}
+.badge-upcoming{background:var(--bg2);color:var(--text3);}
+.badge-done{background:var(--blue-pale);color:var(--accent);}
+.ph-weeks{font-size:30px;font-weight:600;color:var(--blue-deep);line-height:1.1;}
+.ph-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.ph-dates{font-size:12px;color:var(--text3);margin-top:6px;}
+.ph-bar-bg{height:4px;background:var(--bg2);border-radius:4px;margin-top:10px;}
+.ph-bar-fill{height:4px;border-radius:4px;transition:width .5s ease;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:1.1rem 1.25rem;}
+.stat-num{font-size:34px;font-weight:600;color:var(--blue);line-height:1;}
+.stat-lbl{font-size:14px;color:var(--text2);margin-top:4px;}
+
+/* TABS */
+.month-tabs{display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;}
+.tab{font-size:15px;font-weight:500;padding:7px 20px;border-radius:20px;cursor:pointer;background:var(--white);color:var(--text2);border:1px solid var(--border2);transition:all .15s;}
+.tab:hover{border-color:var(--blue-light);color:var(--blue);}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* PROGRESS */
+.prog-row{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;}
+.prog-bg{flex:1;height:8px;background:var(--bg2);border-radius:8px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--blue-mid),var(--blue-light));transition:width .35s ease;}
+.prog-txt{font-size:15px;font-weight:600;color:var(--blue);min-width:40px;text-align:right;}
+
+/* NOTICE */
+.notice{font-size:14px;color:var(--text2);background:var(--blue-pale);border:1px solid var(--blue-pale2);border-radius:var(--radius-sm);padding:10px 16px;margin-bottom:1.25rem;}
+
+/* CHECKLIST */
+.week-block{margin-bottom:1.5rem;}
+.week-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.week-lbl{font-size:14px;font-weight:600;color:var(--text2);}
+.week-tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--blue-pale);color:var(--accent);font-weight:500;}
+.week-tag.past{background:var(--bg2);color:var(--text3);}
+.week-prog-mini{font-size:13px;color:var(--text3);}
+.day-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius-sm);border:1px solid transparent;transition:background .12s,border-color .12s;}
+.day-row:hover{background:var(--blue-pale);border-color:var(--blue-pale2);}
+.check-box{width:20px;height:20px;min-width:20px;border:2px solid var(--border2);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;background:var(--white);}
+.check-box:hover{border-color:var(--blue-mid);}
+.check-box.done{background:var(--blue-mid);border-color:var(--blue-mid);}
+.check-tick{display:none;width:11px;height:11px;}
+.check-box.done .check-tick{display:block;}
+.day-name{font-size:15px;font-weight:600;color:var(--text2);min-width:64px;}
+.day-task{font-size:17px;color:var(--text);flex:1;}
+.day-task.rest{color:var(--text3);font-style:italic;font-size:15px;}
+.day-task.done-text{text-decoration:line-through;color:var(--text3);}
+.past-lbl{font-size:13px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:1.5rem 0 .75rem;}
+.divider{height:1px;background:var(--border);margin:1.75rem 0;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1400&q=85&auto=format&fit=crop" alt="Airplane wing over clouds"
+    onerror="this.parentElement.style.background='linear-gradient(135deg,#1565c0,#42a5f5)';this.style.display='none'">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-title">Pilot Study Planner</div>
+    <div class="hero-sub">✈ Aptitude Test Preparation — 4 Month Programme</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- EXAM DATE -->
+  <div class="card">
+    <div class="card-title">วันสอบ</div>
+    <div class="exam-row">
+      <div class="exam-lbl">ตั้งวันสอบเพื่อเริ่มนับถอยหลัง</div>
+      <input type="date" id="examDate" class="config-input">
+      <button class="set-btn" onclick="setExamDate()">ตั้งค่า</button>
+      <span class="save-chip" id="exam-saved">บันทึกแล้ว ✓</span>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="countdown">
+    <div class="cd-card"><div class="cd-num" id="cd-days">—</div><div class="cd-label">วัน</div></div>
+    <div class="cd-card"><div class="cd-num" id="cd-hours">—</div><div class="cd-label">ชั่วโมง</div></div>
+    <div class="cd-card"><div class="cd-num" id="cd-mins">—</div><div class="cd-label">นาที</div></div>
+    <div class="cd-card"><div class="cd-num" id="cd-secs">—</div><div class="cd-label">วินาที</div></div>
+  </div>
+
+  <!-- PHASE CONFIG -->
+  <div class="card">
+    <div class="card-title">กำหนดช่วงเวลาแต่ละ Phase</div>
+    <div class="phase-config-grid" id="phase-config"></div>
+    <div style="margin-top:1rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button class="set-btn" onclick="savePhases()">บันทึก Phase</button>
+      <span class="save-chip" id="phase-saved">บันทึกแล้ว ✓</span>
+    </div>
+  </div>
+
+  <!-- GANTT TIMELINE -->
+  <div class="card">
+    <div class="card-title">Timeline</div>
+    <div class="gantt-wrap">
+      <div class="gantt-container" id="gantt-container">
+        <div class="gantt-empty">กรอกวันเริ่มต้นของแต่ละ Phase แล้วกด "บันทึก Phase" เพื่อแสดง timeline</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE SUMMARY -->
+  <div class="card">
+    <div class="card-title">Phase Progress</div>
+    <div class="phases" id="phases-grid"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- STATS -->
+  <div class="card" style="padding:1.1rem 1.5rem;">
+    <div class="card-title">ภาพรวม</div>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-num" id="stat-weeks">0</div><div class="stat-lbl">สัปดาห์ที่บันทึก</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-pct">0%</div><div class="stat-lbl">progress รวม</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-streak">0</div><div class="stat-lbl">สัปดาห์ครบติดต่อกัน</div></div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST -->
+  <div class="card">
+    <div class="card-title">Weekly Checklist</div>
+    <div class="month-tabs" id="month-tabs"></div>
+    <div class="notice" id="week-notice"></div>
+    <div class="prog-row">
+      <div class="prog-bg"><div class="prog-fill" id="week-prog-fill" style="width:0%"></div></div>
+      <span class="prog-txt" id="week-prog-txt">0%</span>
+    </div>
+    <div id="checklist-body"></div>
+  </div>
+
+</div>
+
+<script>
+const PHASE_DEFS = [
+  {id:'p1', name:'Phase 1', sub:'เรียนรู้ Pattern', color:'#2e7d32', colorLight:'#e8f5e9'},
+  {id:'p2', name:'Phase 2', sub:'เพิ่มความเร็ว',   color:'#1565c0', colorLight:'#e3f2fd'},
+  {id:'p3', name:'Phase 3', sub:'Mock Test',         color:'#e65100', colorLight:'#fff3e0'},
+  {id:'p4', name:'Phase 4', sub:'รักษาฟอร์ม',       color:'#6a1b9a', colorLight:'#f3e5f5'},
+];
+
+const MONTHS_DATA = [
+  {id:'m1',label:'เดือน 1 — Pattern',days:[
+    {d:'จันทร์',t:'Part 1 Series Picture'},
+    {d:'อังคาร',t:'Part 4 Series Number'},
+    {d:'พุธ',t:'Part 5 พับกล่อง'},
+    {d:'พฤหัส',t:'Part 2 ประกอบรูป'},
+    {d:'ศุกร์',t:'Part 3 Error ID + Part 7 Similarity'},
+    {d:'เสาร์',t:'Part 6 Memory (ฝึกจำ)'},
+    {d:'อาทิตย์',t:'พัก',rest:true},
+  ]},
+  {id:'m2',label:'เดือน 2 — ความเร็ว',days:[
+    {d:'จันทร์',t:'Part 1 Series Picture (จับเวลา)'},
+    {d:'อังคาร',t:'Part 4 Series Number (จับเวลา)'},
+    {d:'พุธ',t:'Part 5 พับกล่อง (จับเวลา)'},
+    {d:'พฤหัส',t:'Part 2 ประกอบรูป (จับเวลา)'},
+    {d:'ศุกร์',t:'Part 3 Error ID + Part 7 Similarity (จับเวลา)'},
+    {d:'เสาร์',t:'Part 6 Memory — ฝึกจำความเร็ว'},
+    {d:'อาทิตย์',t:'พัก',rest:true},
+  ]},
+  {id:'m3',label:'เดือน 3 — Mock Test',days:[
+    {d:'จันทร์',t:'Part ที่อ่อนสุด เจาะลึก'},
+    {d:'อังคาร',t:'Part ที่อ่อนสุด เจาะลึก'},
+    {d:'พุธ',t:'Mock test เต็ม (ทุก Part ต่อเนื่อง)'},
+    {d:'พฤหัส',t:'Review ข้อที่ผิด'},
+    {d:'ศุกร์',t:'Part ที่อ่อนสุด'},
+    {d:'เสาร์',t:'Mock test เต็ม อีกรอบ'},
+    {d:'อาทิตย์',t:'พัก',rest:true},
+  ]},
+  {id:'m4',label:'เดือน 4 — รักษาฟอร์ม',days:[
+    {d:'จันทร์',t:'Mock test + เจาะจุดอ่อน'},
+    {d:'อังคาร',t:'Mock test + เจาะจุดอ่อน'},
+    {d:'พุธ',t:'Review ข้อที่ผิด'},
+    {d:'พฤหัส',t:'Mock test รอบที่ 2'},
+    {d:'ศุกร์',t:'Part ที่ยังอ่อน'},
+    {d:'เสาร์',t:'Mock test เต็ม'},
+    {d:'อาทิตย์',t:'พัก',rest:true},
+  ]},
+];
+
+let examDate = null;
+let phases = {p1:{start:null,end:null}, p2:{start:null,end:null}, p3:{start:null,end:null}, p4:{start:null,end:null}};
+let checks = {};
+let activeMonth = 'm1';
+
+// ── STORAGE ──
+function loadState() {
+  try {
+    const s = localStorage.getItem('pilot_v3');
+    if (s) {
+      const p = JSON.parse(s);
+      examDate = p.examDate ? new Date(p.examDate) : null;
+      checks = p.checks || {};
+      if (p.phases) {
+        Object.keys(p.phases).forEach(k => {
+          phases[k] = {
+            start: p.phases[k].start ? new Date(p.phases[k].start) : null,
+            end:   p.phases[k].end   ? new Date(p.phases[k].end)   : null,
+          };
+        });
+      }
+    }
+  } catch(e) {}
+  if (examDate) document.getElementById('examDate').value = toInputDate(examDate);
+}
+
+function saveState() {
+  try {
+    const phasesSerial = {};
+    Object.keys(phases).forEach(k => {
+      phasesSerial[k] = {
+        start: phases[k].start ? phases[k].start.toISOString() : null,
+        end:   phases[k].end   ? phases[k].end.toISOString()   : null,
+      };
+    });
+    localStorage.setItem('pilot_v3', JSON.stringify({
+      examDate: examDate ? examDate.toISOString() : null,
+      checks,
+      phases: phasesSerial,
+    }));
+  } catch(e) {}
+}
+
+function toInputDate(d) { return d ? d.toISOString().split('T')[0] : ''; }
+function parseDate(s)   { return s ? new Date(s + 'T00:00:00') : null; }
+function fmtDate(d)     {
+  if (!d) return '—';
+  return d.toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'});
+}
+
+// ── EXAM DATE ──
+function setExamDate() {
+  const v = document.getElementById('examDate').value;
+  if (!v) return;
+  examDate = new Date(v + 'T08:00:00');
+  saveState();
+  renderPhaseSummary();
+  renderGantt();
+  updateStats();
+  const chip = document.getElementById('exam-saved');
+  chip.classList.add('show');
+  setTimeout(() => chip.classList.remove('show'), 2000);
+}
+
+// ── COUNTDOWN ──
+function updateCountdown() {
+  if (!examDate) {
+    ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => document.getElementById(id).textContent = '—');
+    return;
+  }
+  const diff = examDate.getTime() - Date.now();
+  if (diff <= 0) {
+    ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => document.getElementById(id).textContent = '0');
+    return;
+  }
+  document.getElementById('cd-days').textContent  = Math.floor(diff / 86400000);
+  document.getElementById('cd-hours').textContent = Math.floor((diff % 86400000) / 3600000);
+  document.getElementById('cd-mins').textContent  = Math.floor((diff % 3600000) / 60000);
+  document.getElementById('cd-secs').textContent  = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+}
+
+// ── PHASE CONFIG FORM ──
+function renderPhaseConfigForm() {
+  const container = document.getElementById('phase-config');
+  container.innerHTML = PHASE_DEFS.map(p => {
+    const sv = phases[p.id].start ? toInputDate(phases[p.id].start) : '';
+    const ev = phases[p.id].end   ? toInputDate(phases[p.id].end)   : '';
+    return `<div class="pc-row">
+      <div class="pc-label">
+        <div class="pc-dot" style="background:${p.color}"></div>
+        ${p.name} — ${p.sub}
+      </div>
+      <div class="pc-dates">
+        <input type="date" id="start_${p.id}" class="pc-input" value="${sv}" placeholder="วันเริ่มต้น">
+        <span>→</span>
+        <input type="date" id="end_${p.id}" class="pc-input" value="${ev}" placeholder="วันสิ้นสุด">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function savePhases() {
+  PHASE_DEFS.forEach(p => {
+    phases[p.id].start = parseDate(document.getElementById('start_' + p.id).value);
+    phases[p.id].end   = parseDate(document.getElementById('end_'   + p.id).value);
+  });
+  saveState();
+  renderGantt();
+  renderPhaseSummary();
+  const chip = document.getElementById('phase-saved');
+  chip.classList.add('show');
+  setTimeout(() => chip.classList.remove('show'), 2000);
+}
+
+// ── GANTT ──
+function renderGantt() {
+  const container = document.getElementById('gantt-container');
+
+  // collect all valid dates to find range
+  const allDates = [];
+  PHASE_DEFS.forEach(p => {
+    if (phases[p.id].start) allDates.push(phases[p.id].start.getTime());
+    if (phases[p.id].end)   allDates.push(phases[p.id].end.getTime());
+  });
+  if (examDate) allDates.push(examDate.getTime());
+
+  const hasAny = PHASE_DEFS.some(p => phases[p.id].start || phases[p.id].end);
+  if (!hasAny) {
+    container.innerHTML = '<div class="gantt-empty">กรอกวันเริ่มต้นของแต่ละ Phase แล้วกด "บันทึก Phase" เพื่อแสดง timeline</div>';
+    return;
+  }
+
+  const minTs = Math.min(...allDates) - 86400000 * 3;
+  const maxTs = Math.max(...allDates) + 86400000 * 3;
+  const totalMs = maxTs - minTs;
+
+  function pct(ts) { return Math.max(0, Math.min(100, (ts - minTs) / totalMs * 100)); }
+
+  // build month labels
+  const monthLabels = [];
+  const cursor = new Date(minTs);
+  cursor.setDate(1);
+  while (cursor.getTime() <= maxTs) {
+    const label = cursor.toLocaleDateString('th-TH', {month:'short', year:'2-digit'});
+    monthLabels.push({ label, pct: pct(cursor.getTime()) });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  let html = '';
+
+  // header months
+  html += `<div class="gantt-header"><div class="gantt-header-inner">`;
+  monthLabels.forEach(m => {
+    html += `<div class="gantt-month-label" style="left:${m.pct}%">${m.label}</div>`;
+  });
+  html += `</div></div>`;
+
+  // rows
+  PHASE_DEFS.forEach(p => {
+    const ph = phases[p.id];
+    if (!ph.start && !ph.end) return;
+
+    const startTs = ph.start ? ph.start.getTime() : minTs;
+    const endTs   = ph.end   ? ph.end.getTime()   : (ph.start ? ph.start.getTime() + 86400000 * 28 : maxTs);
+    const left  = pct(startTs);
+    const right = pct(endTs);
+    const width = Math.max(right - left, 1);
+    const durationDays = Math.round((endTs - startTs) / 86400000);
+
+    html += `<div class="gantt-row">
+      <div class="gantt-label">${p.name}<br><span style="font-size:11px;color:var(--text3);font-weight:400">${p.sub}</span></div>
+      <div class="gantt-track">`;
+
+    // today line
+    const nowPct = pct(Date.now());
+    if (nowPct > 0 && nowPct < 100) {
+      html += `<div class="gantt-today" style="left:${nowPct}%"></div>`;
+    }
+    // exam line
+    if (examDate) {
+      const ePct = pct(examDate.getTime());
+      if (ePct > 0 && ePct < 100) {
+        html += `<div class="gantt-exam-line" style="left:${ePct}%"></div>`;
+      }
+    }
+
+    html += `<div class="gantt-bar" style="left:${left}%;width:${width}%;background:${p.color}" title="${fmtDate(ph.start)} → ${fmtDate(ph.end)} (${durationDays} วัน)">
+        ${width > 8 ? durationDays + ' วัน' : ''}
+      </div>
+    </div></div>`;
+  });
+
+  // exam bar
+  if (examDate) {
+    const ePct = pct(examDate.getTime());
+    html += `<div class="gantt-row">
+      <div class="gantt-label" style="font-size:13px;font-weight:700;color:var(--blue)">🎯 วันสอบ</div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="left:${Math.max(0,ePct-0.5)}%;width:1%;min-width:4px;background:var(--blue);border-radius:2px"></div>
+      </div>
+    </div>`;
+  }
+
+  // legend
+  html += `<div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;padding-left:110px;">`;
+  PHASE_DEFS.forEach(p => {
+    html += `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)">
+      <div style="width:10px;height:10px;border-radius:2px;background:${p.color};flex-shrink:0"></div>${p.name}
+    </div>`;
+  });
+  html += `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)">
+    <div style="width:2px;height:12px;background:rgba(229,57,53,.7);flex-shrink:0"></div>วันนี้
+  </div>`;
+  if (examDate) {
+    html += `<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)">
+      <div style="width:2px;height:12px;background:var(--blue);flex-shrink:0"></div>วันสอบ
+    </div>`;
+  }
+  html += `</div>`;
+
+  container.innerHTML = html;
+}
+
+// ── PHASE SUMMARY ──
+function renderPhaseSummary() {
+  const grid = document.getElementById('phases-grid');
+  const now = Date.now();
+  grid.innerHTML = PHASE_DEFS.map(p => {
+    const ph = phases[p.id];
+    let badge = '<span class="ph-badge badge-upcoming">รอ</span>';
+    let weeksLeft = '—';
+    let pct = 0;
+    let dateStr = '';
+
+    if (ph.start && ph.end) {
+      const startTs = ph.start.getTime();
+      const endTs   = ph.end.getTime();
+      dateStr = `${fmtDate(ph.start)} → ${fmtDate(ph.end)}`;
+      if (now > endTs) {
+        badge = '<span class="ph-badge badge-done">เสร็จ</span>';
+        pct = 100;
+      } else if (now >= startTs) {
+        badge = '<span class="ph-badge badge-active">กำลังอ่าน</span>';
+        const daysLeft = Math.ceil((endTs - now) / 86400000);
+        weeksLeft = Math.ceil(daysLeft / 7);
+        pct = Math.round(Math.max(0, Math.min(100, (now - startTs) / (endTs - startTs) * 100)));
+      } else {
+        const daysUntil = Math.ceil((startTs - now) / 86400000);
+        weeksLeft = `อีก ${daysUntil} วัน`;
+      }
+    } else if (ph.start && !ph.end && examDate) {
+      // auto end = examDate
+      const startTs = ph.start.getTime();
+      const endTs   = examDate.getTime();
+      dateStr = `${fmtDate(ph.start)} → วันสอบ`;
+      if (now > endTs) {
+        badge = '<span class="ph-badge badge-done">เสร็จ</span>';
+        pct = 100;
+      } else if (now >= startTs) {
+        badge = '<span class="ph-badge badge-active">กำลังอ่าน</span>';
+        const daysLeft = Math.ceil((endTs - now) / 86400000);
+        weeksLeft = Math.ceil(daysLeft / 7);
+        pct = Math.round(Math.max(0, Math.min(100, (now - startTs) / (endTs - startTs) * 100)));
+      }
+    }
+
+    const weeksDisplay = (typeof weeksLeft === 'number')
+      ? `${weeksLeft} <span style="font-size:16px;font-weight:400;color:var(--text2)">สัปดาห์</span>`
+      : `<span style="font-size:16px">${weeksLeft}</span>`;
+
+    return `<div class="phase-card">
+      <div class="ph-top">
+        <span class="ph-name">${p.name} — ${p.sub}</span>
+        ${badge}
+      </div>
+      <div class="ph-weeks">${weeksDisplay}</div>
+      <div class="ph-sub">เหลือเวลา</div>
+      ${dateStr ? `<div class="ph-dates">${dateStr}</div>` : ''}
+      <div class="ph-bar-bg"><div class="ph-bar-fill" style="width:${pct}%;background:${p.color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── ISO WEEK ──
+function getISOWeek(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const y = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return `${d.getUTCFullYear()}W${String(Math.ceil((((d - y) / 86400000) + 1) / 7)).padStart(2, '0')}`;
+}
+function cwk() { return getISOWeek(new Date()); }
+
+// ── TABS ──
+function renderMonthTabs() {
+  document.getElementById('month-tabs').innerHTML = MONTHS_DATA.map(m =>
+    `<div class="tab${m.id === activeMonth ? ' active' : ''}" onclick="switchMonth('${m.id}')">${m.label.split('—')[0].trim()}</div>`
+  ).join('');
+}
+function switchMonth(id) { activeMonth = id; renderMonthTabs(); renderChecklist(); }
+
+function ck(mid, wk, di) { return `${mid}_${wk}_d${di}`; }
+
+// ── CHECKLIST ──
+function renderChecklist() {
+  const body = document.getElementById('checklist-body');
+  const month = MONTHS_DATA.find(m => m.id === activeMonth);
+  const wk = cwk();
+  const pastWeeks = [...new Set(
+    Object.keys(checks)
+      .filter(k => k.startsWith(activeMonth + '_') && !k.includes(wk))
+      .map(k => k.split('_')[1])
+  )].sort().reverse().slice(0, 3);
+
+  document.getElementById('week-notice').textContent =
+    `สัปดาห์นี้: ${wk} — checklist รีเซ็ตทุกต้นสัปดาห์ แต่ progress สะสมจากทุกสัปดาห์ที่ผ่านมา`;
+
+  let html = renderWeekBlock(month, wk, true);
+  if (pastWeeks.length) {
+    html += `<div class="past-lbl">สัปดาห์ที่ผ่านมา</div>`;
+    pastWeeks.forEach(pw => { html += renderWeekBlock(month, pw, false); });
+  }
+  body.innerHTML = html;
+  updateWeekProgress();
+}
+
+function renderWeekBlock(month, wk, isCurrent) {
+  const taskDays = month.days.filter(d => !d.rest);
+  const done = taskDays.filter(d => checks[ck(month.id, wk, month.days.indexOf(d))]).length;
+  const dis = isCurrent ? '' : 'opacity:.45;pointer-events:none;';
+  let html = `<div class="week-block" style="${dis}">
+    <div class="week-hdr">
+      <span class="week-lbl">${isCurrent ? 'สัปดาห์ปัจจุบัน' : wk}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="week-prog-mini">${done}/${taskDays.length} tasks</span>
+        <span class="week-tag${isCurrent ? '' : ' past'}">${isCurrent ? 'สัปดาห์นี้' : wk}</span>
+      </div>
+    </div>`;
+  month.days.forEach((day, di) => {
+    const key = ck(month.id, wk, di);
+    const isDone = !!checks[key];
+    html += `<div class="day-row" id="row_${key}">
+      <div class="check-box${isDone ? ' done' : ''}" onclick="toggleCheck('${key}')">
+        <svg class="check-tick" viewBox="0 0 11 11" fill="none"><polyline points="1.5,5.5 4.5,8.5 9.5,2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <span class="day-name">${day.d}</span>
+      <span class="day-task${day.rest ? ' rest' : ''}${isDone ? ' done-text' : ''}">${day.t}</span>
+    </div>`;
+  });
+  return html + '</div>';
+}
+
+function toggleCheck(key) {
+  checks[key] = !checks[key];
+  saveState();
+  const row = document.getElementById('row_' + key);
+  if (row) {
+    row.querySelector('.check-box').classList.toggle('done', checks[key]);
+    row.querySelector('.day-task').classList.toggle('done-text', checks[key]);
+  }
+  updateWeekProgress();
+  updateStats();
+}
+
+function updateWeekProgress() {
+  const month = MONTHS_DATA.find(m => m.id === activeMonth);
+  const wk = cwk();
+  const taskDays = month.days.filter(d => !d.rest);
+  const done = taskDays.filter(d => checks[ck(month.id, wk, month.days.indexOf(d))]).length;
+  const pct = taskDays.length ? Math.round(done / taskDays.length * 100) : 0;
+  document.getElementById('week-prog-fill').style.width = pct + '%';
+  document.getElementById('week-prog-txt').textContent = pct + '%';
+}
+
+function updateStats() {
+  const allWeeks = new Set(Object.keys(checks).filter(k => checks[k]).map(k => k.split('_').slice(0, 2).join('_')));
+  document.getElementById('stat-weeks').textContent = allWeeks.size;
+  let total = 0, done = 0;
+  MONTHS_DATA.forEach(m => {
+    const taskDays = m.days.filter(d => !d.rest);
+    const weeks = [...new Set(Object.keys(checks).filter(k => k.startsWith(m.id + '_')).map(k => k.split('_')[1]))];
+    const wk = cwk();
+    const all = weeks.includes(wk) ? weeks : [...weeks, wk];
+    all.forEach(w => { taskDays.forEach(day => { total++; if (checks[ck(m.id, w, m.days.indexOf(day))]) done++; }); });
+  });
+  document.getElementById('stat-pct').textContent = total ? Math.round(done / total * 100) + '%' : '0%';
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 16; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i * 7);
+    const wk = getISOWeek(d);
+    const ok = MONTHS_DATA.every(m => {
+      const td = m.days.filter(day => !day.rest);
+      return td.every(day => checks[ck(m.id, wk, m.days.indexOf(day))]);
+    });
+    if (ok) streak++; else break;
+  }
+  document.getElementById('stat-streak').textContent = streak;
+}
+
+// ── INIT ──
+loadState();
+renderPhaseConfigForm();
+renderGantt();
+renderPhaseSummary();
+renderMonthTabs();
+renderChecklist();
+updateStats();
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+</body>
+</html>
