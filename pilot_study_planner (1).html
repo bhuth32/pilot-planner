@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✈️ Pilot Study Planner</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f5f5f4;
+    --bg3: #eeece8;
+    --text: #1a1a1a;
+    --text2: #6b6b6b;
+    --text3: #aaa;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --info-bg: #e6f1fb;
+    --info-text: #185fa5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1e1e;
+      --bg2: #2a2a2a;
+      --bg3: #333;
+      --text: #f0f0f0;
+      --text2: #aaa;
+      --text3: #666;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.2);
+      --info-bg: #0c3158;
+      --info-text: #85b7eb;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem 1.5rem;
+    max-width: 780px;
+    margin: 0 auto;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .title { font-size: 22px; font-weight: 500; color: var(--text); }
+  .subtitle { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+  .header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px; margin-bottom: 1.75rem;
+  }
+
+  .config-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .config-label { font-size: 13px; color: var(--text2); }
+  .config-input {
+    font-size: 13px; padding: 6px 10px;
+    border: 0.5px solid var(--border2); border-radius: var(--radius);
+    background: var(--bg); color: var(--text); width: 165px;
+  }
+  .set-btn {
+    font-size: 12px; padding: 6px 14px;
+    border-radius: var(--radius); border: 0.5px solid var(--border2);
+    background: var(--bg); color: var(--text); cursor: pointer;
+    transition: background .15s;
+  }
+  .set-btn:hover { background: var(--bg2); }
+
+  /* Countdown */
+  .countdown-grid {
+    display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 10px; margin-bottom: 1.75rem;
+  }
+  .count-card {
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 0.75rem 1rem; text-align: center;
+  }
+  .count-num { font-size: 32px; font-weight: 500; color: var(--text); line-height: 1; }
+  .count-label { font-size: 11px; color: var(--text2); margin-top: 4px; letter-spacing: 0.4px; }
+
+  /* Phases */
+  .section-label {
+    font-size: 13px; font-weight: 500; color: var(--text2);
+    margin-bottom: 10px; letter-spacing: 0.3px;
+  }
+  .phases { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 1.75rem; }
+  .phase-card {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+  }
+  .phase-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .phase-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+  .badge-active { background: #E1F5EE; color: #0F6E56; }
+  .badge-upcoming { background: #F1EFE8; color: #5F5E5A; }
+  .badge-done { background: #EAF3DE; color: #3B6D11; }
+  .phase-time { font-size: 22px; font-weight: 500; color: var(--text); line-height: 1.2; }
+  .phase-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .phase-bar-bg { height: 4px; background: var(--bg2); border-radius: 4px; margin-top: 10px; }
+  .phase-bar-fill { height: 4px; border-radius: 4px; transition: width .4s; }
+
+  /* Stats */
+  .stats-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 1.75rem; }
+  .stat-card { background: var(--bg2); border-radius: var(--radius); padding: 0.75rem 1rem; }
+  .stat-num { font-size: 22px; font-weight: 500; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* Tabs */
+  .month-tabs { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .tab {
+    font-size: 12px; padding: 5px 14px; border-radius: 20px;
+    border: 0.5px solid var(--border2); cursor: pointer;
+    background: var(--bg); color: var(--text2); transition: all .15s;
+  }
+  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  /* Progress bar */
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+  .prog-bar-bg { flex: 1; height: 6px; background: var(--bg2); border-radius: 6px; }
+  .prog-bar-fill { height: 6px; border-radius: 6px; background: var(--text); transition: width .3s; }
+  .prog-text { font-size: 12px; color: var(--text2); min-width: 36px; text-align: right; }
+
+  /* Notice */
+  .notice {
+    font-size: 12px; color: var(--text2);
+    background: var(--bg2); border-radius: var(--radius);
+    padding: 8px 12px; margin-bottom: 1rem;
+  }
+
+  /* Checklist */
+  .week-block { margin-bottom: 1.25rem; }
+  .week-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .week-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+  .week-tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 20px;
+    background: var(--info-bg); color: var(--info-text);
+  }
+  .week-tag.past { background: var(--bg2); color: var(--text3); }
+  .week-progress-mini { font-size: 11px; color: var(--text2); }
+
+  .day-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 0.5px solid var(--border);
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-name { font-size: 13px; color: var(--text2); min-width: 48px; }
+  .day-task { font-size: 13px; color: var(--text); flex: 1; }
+  .day-task.rest { color: var(--text2); font-style: italic; }
+  .day-task.done-text { text-decoration: line-through; color: var(--text3); }
+
+  .check-box {
+    width: 17px; height: 17px; min-width: 17px;
+    border: 0.5px solid var(--border2); border-radius: 4px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .check-box.done { background: var(--text); border-color: var(--text); }
+  .check-tick { display: none; width: 9px; height: 9px; }
+  .check-box.done .check-tick { display: block; }
+
+  .divider { height: 0.5px; background: var(--border); margin: 1.75rem 0; }
+
+  .past-section-label {
+    font-size: 12px; color: var(--text3); margin-bottom: 8px; margin-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="title">✈️ Pilot Aptitude — Study Planner</div>
+    <div class="subtitle">checklist รีเซ็ตทุกอาทิตย์ แต่นับ progress สะสมทุกสัปดาห์</div>
+  </div>
+  <div class="config-row">
+    <span class="config-label">วันสอบ:</span>
+    <input type="date" id="examDate" class="config-input">
+    <button class="set-btn" onclick="setExamDate()">ตั้งค่า</button>
+  </div>
+</div>
+
+<div class="countdown-grid">
+  <div class="count-card"><div class="count-num" id="cd-days">—</div><div class="count-label">วัน</div></div>
+  <div class="count-card"><div class="count-num" id="cd-hours">—</div><div class="count-label">ชั่วโมง</div></div>
+  <div class="count-card"><div class="count-num" id="cd-mins">—</div><div class="count-label">นาที</div></div>
+  <div class="count-card"><div class="count-num" id="cd-secs">—</div><div class="count-label">วินาที</div></div>
+</div>
+
+<div class="section-label">Phase Progress</div>
+<div class="phases" id="phases-grid"></div>
+
+<div class="divider"></div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-num" id="stat-weeks">0</div><div class="stat-label">สัปดาห์ที่ผ่านมา</div></div>
+  <div class="stat-card"><div class="stat-num" id="stat-pct">0%</div><div class="stat-label">progress รวม</div></div>
+  <div class="stat-card"><div class="stat-num" id="stat-streak">0</div><div class="stat-label">สัปดาห์ครบติดต่อกัน</div></div>
+</div>
+
+<div class="section-label">Weekly Checklist</div>
+<div class="month-tabs" id="month-tabs"></div>
+<div class="notice" id="week-notice"></div>
+<div class="progress-row">
+  <div class="prog-bar-bg"><div class="prog-bar-fill" id="week-prog-fill" style="width:0%"></div></div>
+  <span class="prog-text" id="week-prog-txt">0%</span>
+</div>
+<div id="checklist-body"></div>
+
+<script>
+const MONTHS = [
+  {id:'m1',label:'เดือน 1 — Pattern',days:[
+    {d:'จันทร์',t:'Part 1 Series Picture'},
+    {d:'อังคาร',t:'Part 4 Series Number'},
+    {d:'พุธ',t:'Part 5 พับกล่อง'},
+    {d:'พฤหัส',t:'Part 2 ประกอบรูป'},
+    {d:'ศุกร์',t:'Part 3 Error ID + Part 7 Similarity'},
+    {d:'เสาร์',t:'Part 6 Memory (ฝึกจำ)'},
+    {d:'อาทิตย์',t:'พัก',rest:true},
+  ]},
+  {id:'m2',label:'เดือน 2 — ความเร็ว',days:[
+    {d:'จันทร์',t:'Part 1 Series Picture (จับเวลา)'},
+    {d:'อังคาร',t:'Part 4 Series Number (จับเวลา)'},
+    {d:'พุธ',t:'Part 5 พับกล่อง (จับเวลา)'},
+    {d:'พฤหัส',t:'Part 2 ประกอบรูป (จับเวลา)'},
+    {d:'ศุกร์',t:'Part 3 Error ID + Part 7 Similarity (จับเวลา)'},
+    {d:'เสาร์',t:'Part 6 Memory — ฝึกจำความเร็ว'},
+    {d:'อาทิตย์',t:'พัก',rest:true},
+  ]},
+  {id:'m3',label:'เดือน 3 — Mock Test',days:[
+    {d:'จันทร์',t:'Part ที่อ่อนสุด เจาะลึก'},
+    {d:'อังคาร',t:'Part ที่อ่อนสุด เจาะลึก'},
+    {d:'พุธ',t:'Mock test เต็ม (ทุก Part ต่อเนื่อง)'},
+    {d:'พฤหัส',t:'Review ข้อที่ผิด'},
+    {d:'ศุกร์',t:'Part ที่อ่อนสุด'},
+    {d:'เสาร์',t:'Mock test เต็ม อีกรอบ'},
+    {d:'อาทิตย์',t:'พัก',rest:true},
+  ]},
+  {id:'m4',label:'เดือน 4 — รักษาฟอร์ม',days:[
+    {d:'จันทร์',t:'Mock test + เจาะจุดอ่อน'},
+    {d:'อังคาร',t:'Mock test + เจาะจุดอ่อน'},
+    {d:'พุธ',t:'Review ข้อที่ผิด'},
+    {d:'พฤหัส',t:'Mock test รอบที่ 2'},
+    {d:'ศุกร์',t:'Part ที่ยังอ่อน'},
+    {d:'เสาร์',t:'Mock test เต็ม'},
+    {d:'อาทิตย์',t:'พัก',rest:true},
+  ]},
+];
+
+let examDate = null;
+let checks = {};
+let activeMonth = 'm1';
+
+function getISOWeek(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}W${String(week).padStart(2,'0')}`;
+}
+
+function currentWeekKey() { return getISOWeek(new Date()); }
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('pilot_planner_v2');
+    if (s) { const p = JSON.parse(s); examDate = p.examDate ? new Date(p.examDate) : null; checks = p.checks || {}; }
+  } catch(e) {}
+  if (examDate) document.getElementById('examDate').value = examDate.toISOString().split('T')[0];
+}
+
+function saveState() {
+  try { localStorage.setItem('pilot_planner_v2', JSON.stringify({ examDate: examDate ? examDate.toISOString() : null, checks })); } catch(e) {}
+}
+
+function setExamDate() {
+  const v = document.getElementById('examDate').value;
+  if (!v) return;
+  examDate = new Date(v + 'T08:00:00');
+  saveState();
+  renderPhases();
+  updateStats();
+}
+
+function updateCountdown() {
+  if (!examDate) { ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => document.getElementById(id).textContent = '—'); return; }
+  const diff = examDate.getTime() - Date.now();
+  if (diff <= 0) { ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => document.getElementById(id).textContent = '0'); return; }
+  document.getElementById('cd-days').textContent = Math.floor(diff / 86400000);
+  document.getElementById('cd-hours').textContent = Math.floor((diff % 86400000) / 3600000);
+  document.getElementById('cd-mins').textContent = Math.floor((diff % 3600000) / 60000);
+  document.getElementById('cd-secs').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+}
+
+function renderPhases() {
+  const grid = document.getElementById('phases-grid');
+  const totalDays = examDate ? Math.max(0, (examDate - Date.now()) / 86400000) : null;
+  const phases = [
+    { name:'Phase 1', sub:'เรียนรู้ Pattern', maxDays:112, minDays:84, color:'#5DCAA5' },
+    { name:'Phase 2', sub:'เพิ่มความเร็ว',   maxDays:84,  minDays:56, color:'#378ADD' },
+    { name:'Phase 3', sub:'Mock Test',         maxDays:56,  minDays:28, color:'#EF9F27' },
+    { name:'Phase 4', sub:'รักษาฟอร์ม',       maxDays:28,  minDays:0,  color:'#D85A30' },
+  ];
+  grid.innerHTML = phases.map(p => {
+    let badge = '<span class="badge badge-upcoming">รอ</span>';
+    let weeksLeft = '—'; let pct = 0;
+    if (totalDays !== null) {
+      if (totalDays > p.maxDays) { pct = 0; }
+      else if (totalDays <= p.minDays) { badge = '<span class="badge badge-done">เสร็จ</span>'; pct = 100; }
+      else {
+        badge = '<span class="badge badge-active">กำลังอ่าน</span>';
+        weeksLeft = Math.ceil(totalDays / 7);
+        pct = Math.round(Math.max(0, Math.min(100, (p.maxDays - totalDays) / (p.maxDays - p.minDays) * 100)));
+      }
+    }
+    return `<div class="phase-card">
+      <div class="phase-header"><span class="phase-name">${p.name} — ${p.sub}</span>${badge}</div>
+      <div class="phase-time">${weeksLeft === '—' ? '—' : weeksLeft + ' สัปดาห์'}</div>
+      <div class="phase-sub">เหลือเวลา</div>
+      <div class="phase-bar-bg"><div class="phase-bar-fill" style="width:${pct}%;background:${p.color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderMonthTabs() {
+  document.getElementById('month-tabs').innerHTML = MONTHS.map(m =>
+    `<div class="tab${m.id === activeMonth ? ' active' : ''}" onclick="switchMonth('${m.id}')">${m.label.split('—')[0].trim()}</div>`
+  ).join('');
+}
+
+function switchMonth(id) { activeMonth = id; renderMonthTabs(); renderChecklist(); }
+
+function checkKey(mid, weekKey, di) { return `${mid}_${weekKey}_d${di}`; }
+
+function renderChecklist() {
+  const body = document.getElementById('checklist-body');
+  const month = MONTHS.find(m => m.id === activeMonth);
+  const wk = currentWeekKey();
+  const pastWeeks = [...new Set(
+    Object.keys(checks)
+      .filter(k => k.startsWith(activeMonth + '_') && !k.includes(wk))
+      .map(k => k.split('_')[1])
+  )].sort().reverse().slice(0, 3);
+
+  document.getElementById('week-notice').textContent =
+    `สัปดาห์นี้: ${wk} — checklist รีเซ็ตทุกต้นสัปดาห์ แต่ progress จากสัปดาห์ที่ผ่านมายังนับสะสมอยู่`;
+
+  let html = renderWeekBlock(month, wk, true);
+  if (pastWeeks.length) {
+    html += `<div class="past-section-label">สัปดาห์ที่ผ่านมา</div>`;
+    pastWeeks.forEach(pw => { html += renderWeekBlock(month, pw, false); });
+  }
+  body.innerHTML = html;
+  updateWeekProgress();
+}
+
+function renderWeekBlock(month, wk, isCurrent) {
+  const taskDays = month.days.filter(d => !d.rest);
+  const done = taskDays.filter(d => checks[checkKey(month.id, wk, month.days.indexOf(d))]).length;
+  const disabledStyle = isCurrent ? '' : 'opacity:0.45;pointer-events:none;';
+
+  let html = `<div class="week-block" style="${disabledStyle}">
+    <div class="week-header">
+      <span class="week-label">${isCurrent ? 'สัปดาห์ปัจจุบัน' : wk}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="week-progress-mini">${done}/${taskDays.length} tasks</span>
+        <span class="week-tag${isCurrent ? '' : ' past'}">${isCurrent ? 'สัปดาห์นี้' : wk}</span>
+      </div>
+    </div>`;
+
+  month.days.forEach((day, di) => {
+    const key = checkKey(month.id, wk, di);
+    const isDone = !!checks[key];
+    html += `<div class="day-row" id="row_${key}">
+      <div class="check-box${isDone ? ' done' : ''}" onclick="toggleCheck('${key}','${month.id}','${wk}')">
+        <svg class="check-tick" viewBox="0 0 10 10" fill="none">
+          <polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="day-name">${day.d}</span>
+      <span class="day-task${day.rest ? ' rest' : ''}${isDone ? ' done-text' : ''}">${day.t}</span>
+    </div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function toggleCheck(key, mid, wk) {
+  checks[key] = !checks[key];
+  saveState();
+  const row = document.getElementById('row_' + key);
+  if (row) {
+    row.querySelector('.check-box').classList.toggle('done', checks[key]);
+    row.querySelector('.day-task').classList.toggle('done-text', checks[key]);
+  }
+  updateWeekProgress();
+  updateStats();
+}
+
+function updateWeekProgress() {
+  const month = MONTHS.find(m => m.id === activeMonth);
+  const wk = currentWeekKey();
+  const taskDays = month.days.filter(d => !d.rest);
+  const done = taskDays.filter(d => checks[checkKey(month.id, wk, month.days.indexOf(d))]).length;
+  const pct = taskDays.length ? Math.round(done / taskDays.length * 100) : 0;
+  document.getElementById('week-prog-fill').style.width = pct + '%';
+  document.getElementById('week-prog-txt').textContent = pct + '%';
+}
+
+function updateStats() {
+  const allWeekIds = new Set(Object.keys(checks).filter(k => checks[k]).map(k => k.split('_').slice(0, 2).join('_')));
+  document.getElementById('stat-weeks').textContent = allWeekIds.size;
+
+  let totalTasks = 0, doneTasks = 0;
+  MONTHS.forEach(m => {
+    const taskDays = m.days.filter(d => !d.rest);
+    const weeks = [...new Set(Object.keys(checks).filter(k => k.startsWith(m.id + '_')).map(k => k.split('_')[1]))];
+    const cwk = currentWeekKey();
+    const allWeeks = weeks.includes(cwk) ? weeks : [...weeks, cwk];
+    allWeeks.forEach(wk => {
+      taskDays.forEach(day => {
+        totalTasks++;
+        if (checks[checkKey(m.id, wk, m.days.indexOf(day))]) doneTasks++;
+      });
+    });
+  });
+  document.getElementById('stat-pct').textContent = totalTasks ? Math.round(doneTasks / totalTasks * 100) + '%' : '0%';
+
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 16; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i * 7);
+    const wk = getISOWeek(d);
+    const allComplete = MONTHS.every(m => {
+      const taskDays = m.days.filter(day => !day.rest);
+      return taskDays.every(day => checks[checkKey(m.id, wk, m.days.indexOf(day))]);
+    });
+    if (allComplete) streak++; else break;
+  }
+  document.getElementById('stat-streak').textContent = streak;
+}
+
+loadState();
+renderPhases();
+renderMonthTabs();
+renderChecklist();
+updateStats();
+setInterval(updateCountdown, 1000);
+updateCountdown();
+</script>
+</body>
+</html>
